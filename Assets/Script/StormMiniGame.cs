@@ -72,6 +72,12 @@ public class StormMiniGame : MonoBehaviour
         {
             int index = i;
             answerButtons[i].GetComponentInChildren<TextMeshProUGUI>().text = q.answers[i];
+
+            // Reset button color (solid white) and re-enable interaction
+            answerButtons[i].GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+            answerButtons[i].interactable = true;
+
+            // Clear old listeners then add new one
             answerButtons[i].onClick.RemoveAllListeners();
             answerButtons[i].onClick.AddListener(() => OnAnswerSelected(index));
         }
@@ -79,14 +85,33 @@ public class StormMiniGame : MonoBehaviour
 
     void OnAnswerSelected(int index)
     {
+        // Disable further interaction once an answer is picked
+        foreach (var button in answerButtons)
+            button.interactable = false;
+
+        // Correct answer chosen
         if (index == questions[currentQuestion].correctIndex)
         {
             feedbackText.text = "Correct!";
+            answerButtons[index].GetComponent<Image>().color = new Color(0f, 1f, 0f, 1f); // solid green
             Invoke(nameof(NextStep), 1f);
         }
         else
         {
             feedbackText.text = "Oops! Try again!";
+
+            // Highlight correct answer solid green
+            answerButtons[questions[currentQuestion].correctIndex].GetComponent<Image>().color = new Color(0f, 1f, 0f, 1f);
+
+            // Highlight all wrong answers solid red
+            for (int i = 0; i < answerButtons.Length; i++)
+            {
+                if (i != questions[currentQuestion].correctIndex)
+                    answerButtons[i].GetComponent<Image>().color = new Color(1f, 0f, 0f, 1f);
+            }
+
+            // Move to next step after short delay
+            Invoke(nameof(NextStep), 1.5f);
         }
     }
 
